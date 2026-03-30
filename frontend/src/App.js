@@ -5,7 +5,7 @@ import * as Icons from 'lucide-react';
 import { styles } from './styles';
 import MerchCard from './components/MerchCard';
 import WinningStream from './components/WinningStream';
-import AgentLedger from './components/AgentLedger'; // Import new component
+import AgentLedger from './components/AgentLedger';
 
 const API_BASE = "http://127.0.0.1:8000/api";
 
@@ -20,7 +20,6 @@ function App() {
   const fetchStatus = async () => {
     try {
       const res = await axios.get(`${API_BASE}/status`);
-      // FIXED: Spread operator ensures React triggers a re-render for the Chart
       setAgents([...res.data.agents]);
     } catch (e) { console.log("Init required"); }
   };
@@ -80,7 +79,6 @@ function App() {
       </header>
 
       <main style={styles.mainGrid}>
-        {/* LEFT 60% */}
         <section style={styles.showcasePanel}>
           <div style={styles.panelHeader}>
             <h2 style={styles.panelTitle}><Icons.Layers size={18} /> Merchandise Showcase</h2>
@@ -107,11 +105,11 @@ function App() {
           <WinningStream history={auctionHistory} />
         </section>
 
-        {/* RIGHT 40% */}
         <aside style={styles.sidebarPanel}>
+          {/* Chart 1: Budget Consumption */}
           <div style={styles.sidebarSection}>
-            <h3 style={{fontSize:'0.85rem', color:'#94a3b8', marginBottom:'20px'}}><Icons.BarChart3 size={16} /> RL Learning Progress</h3>
-            <div style={styles.chartBox}>
+            <h3 style={{fontSize:'0.85rem', color:'#94a3b8', marginBottom:'20px'}}><Icons.BarChart3 size={16} /> Budget (Market Participation)</h3>
+            <div style={{...styles.chartBox, height: '220px'}}> {/* Reduced height to fit both */}
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={agents.length > 0 ? agents[0].history.map((_, i) => ({ 
                   cycle: i, 
@@ -121,24 +119,35 @@ function App() {
                   <XAxis dataKey="cycle" hide />
                   <YAxis stroke="#475569" fontSize={10} axisLine={false} tickLine={false} />
                   <Tooltip contentStyle={{ background: '#0f172a', border: '1px solid #334155' }} />
-                  <Legend iconType="circle" />
                   {agents.slice(0, 5).map((a, idx) => (
-                    <Line 
-                      key={a.id} 
-                      type="monotone" 
-                      dataKey={a.id} 
-                      stroke={['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#06b6d4'][idx]} 
-                      strokeWidth={2} 
-                      dot={false}
-                      isAnimationActive={false} // FIXED: Prevents chart black-outs on rapid updates
-                    />
+                    <Line key={a.id} type="monotone" dataKey={a.id} stroke={['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#06b6d4'][idx]} strokeWidth={2} dot={false} isAnimationActive={false} />
+                  ))}
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* NEW Chart 2: Profit Growth (The RL Proof) */}
+          <div style={styles.sidebarSection}>
+            <h3 style={{fontSize:'0.85rem', color:'#10b981', marginBottom:'20px'}}><Icons.TrendingUp size={16} /> Learning Growth (Cumulative Profit)</h3>
+            <div style={{...styles.chartBox, height: '220px'}}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={agents.length > 0 ? agents[0].history.map((_, i) => ({ 
+                  cycle: i, 
+                  ...agents.reduce((acc, a) => ({ ...acc, [a.id]: a.history[i]?.profit }), {}) 
+                })) : []}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                  <XAxis dataKey="cycle" hide />
+                  <YAxis stroke="#475569" fontSize={10} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={{ background: '#0f172a', border: '1px solid #334155' }} />
+                  {agents.slice(0, 5).map((a, idx) => (
+                    <Line key={a.id} type="monotone" dataKey={a.id} stroke={['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#06b6d4'][idx]} strokeWidth={2} dot={false} isAnimationActive={false} />
                   ))}
                 </LineChart>
               </ResponsiveContainer>
             </div>
           </div>
           
-          {/* NEW: Agent Budget Ledger at bottom right */}
           <AgentLedger agents={agents} />
         </aside>
       </main>

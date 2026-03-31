@@ -9,6 +9,13 @@ import AgentLedger from './components/AgentLedger';
 
 const API_BASE = "http://127.0.0.1:8000/api";
 
+// Expanded color palette for dynamic agent counts
+const CHART_COLORS = [
+  '#6366f1', '#10b981', '#f59e0b', '#ec4899', '#06b6d4', 
+  '#8b5cf6', '#f97316', '#14b8a6', '#ef4444', '#a855f7',
+  '#3b82f6', '#fbbf24', '#2dd4bf', '#fb7185', '#60a5fa'
+];
+
 function App() {
   const [agents, setAgents] = useState([]);
   const [config, setConfig] = useState({ count: 5, budget: 100 });
@@ -69,6 +76,18 @@ function App() {
     setLoading(false);
   };
 
+  // Helper to structure data for any number of agents
+  const formatChartData = (type) => {
+    if (agents.length === 0) return [];
+    return agents[0].history.map((_, i) => {
+      const point = { cycle: i };
+      agents.forEach(a => {
+        point[a.id] = a.history[i] ? a.history[i][type] : 0;
+      });
+      return point;
+    });
+  };
+
   return (
     <div style={styles.container}>
       <header style={styles.header}>
@@ -81,35 +100,19 @@ function App() {
         </div>
 
         <div style={{...styles.controlGroup, display: 'flex', alignItems: 'center', gap: '12px'}}>
-          <button 
-            onClick={runSimulation} 
-            style={{...styles.secondaryBtn, borderColor: '#10b981', color: '#10b981', display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px'}} 
-            disabled={loading || agents.length === 0}
-          >
+          <button onClick={runSimulation} style={{...styles.secondaryBtn, borderColor: '#10b981', color: '#10b981', display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px'}} disabled={loading || agents.length === 0}>
             <Icons.Zap size={14} /> <span>Run 20x Sim</span>
           </button>
 
-          {/* Agent Count Input */}
           <div style={{...styles.inputWrapper, minWidth: '100px'}}>
             <Icons.Users size={14} />
-            <input 
-              type="number" 
-              value={config.count} 
-              onChange={e => setConfig({...config, count: e.target.value})} 
-              style={styles.ghostInput} 
-            />
+            <input type="number" value={config.count} onChange={e => setConfig({...config, count: e.target.value})} style={styles.ghostInput} />
             <span style={styles.inputLabel}>Agents</span>
           </div>
 
-          {/* RESTORED: Budget Input */}
           <div style={{...styles.inputWrapper, minWidth: '110px'}}>
             <Icons.DollarSign size={14} />
-            <input 
-              type="number" 
-              value={config.budget} 
-              onChange={e => setConfig({...config, budget: e.target.value})} 
-              style={styles.ghostInput} 
-            />
+            <input type="number" value={config.budget} onChange={e => setConfig({...config, budget: e.target.value})} style={styles.ghostInput} />
             <span style={styles.inputLabel}>Budget</span>
           </div>
 
@@ -145,32 +148,34 @@ function App() {
         </section>
 
         <aside style={styles.sidebarPanel}>
+          {/* Budget Chart - Dynamics Agents */}
           <div style={styles.sidebarSection}>
             <h3 style={{fontSize:'0.85rem', color:'#94a3b8', marginBottom:'20px'}}>Budget (Market Participation)</h3>
             <div style={{...styles.chartBox, height: '220px'}}>
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={agents.length > 0 ? agents[0].history.map((_, i) => ({ cycle: i, ...agents.reduce((acc, a) => ({ ...acc, [a.id]: a.history[i]?.budget }), {}) })) : []}>
+                <LineChart data={formatChartData('budget')}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
                   <YAxis stroke="#475569" fontSize={10} axisLine={false} />
                   <Tooltip contentStyle={{ background: '#0f172a', border: '1px solid #334155' }} />
-                  {agents.slice(0, 5).map((a, idx) => (
-                    <Line key={a.id} type="monotone" dataKey={a.id} stroke={['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#06b6d4'][idx]} strokeWidth={2} dot={false} isAnimationActive={false} />
+                  {agents.map((a, idx) => (
+                    <Line key={a.id} type="monotone" dataKey={a.id} stroke={CHART_COLORS[idx % CHART_COLORS.length]} strokeWidth={2} dot={false} isAnimationActive={false} />
                   ))}
                 </LineChart>
               </ResponsiveContainer>
             </div>
           </div>
 
+          {/* Profit Chart - Dynamics Agents */}
           <div style={styles.sidebarSection}>
             <h3 style={{fontSize:'0.85rem', color:'#10b981', marginBottom:'20px'}}>Learning Growth (Cumulative Profit)</h3>
             <div style={{...styles.chartBox, height: '220px'}}>
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={agents.length > 0 ? agents[0].history.map((_, i) => ({ cycle: i, ...agents.reduce((acc, a) => ({ ...acc, [a.id]: a.history[i]?.profit }), {}) })) : []}>
+                <LineChart data={formatChartData('profit')}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
                   <YAxis stroke="#475569" fontSize={10} axisLine={false} tickLine={false} />
                   <Tooltip contentStyle={{ background: '#0f172a', border: '1px solid #334155' }} />
-                  {agents.slice(0, 5).map((a, idx) => (
-                    <Line key={a.id} type="monotone" dataKey={a.id} stroke={['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#06b6d4'][idx]} strokeWidth={2} dot={false} isAnimationActive={false} />
+                  {agents.map((a, idx) => (
+                    <Line key={a.id} type="monotone" dataKey={a.id} stroke={CHART_COLORS[idx % CHART_COLORS.length]} strokeWidth={2} dot={false} isAnimationActive={false} />
                   ))}
                 </LineChart>
               </ResponsiveContainer>

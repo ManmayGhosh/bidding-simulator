@@ -7,6 +7,7 @@ class BiddingAgent:
         self.bias_type = bias_type
         self.clicks = 0
         self.cumulative_profit = 0.0
+        # Start history with Point 0 to ensure graphs start correctly
         self.history = [{"budget": budget, "profit": 0.0, "clicks": 0}]
 
     def calculate_bid(self, observation):
@@ -14,7 +15,7 @@ class BiddingAgent:
         interest = observation.get('user_interest_score', 0.5)
         view = observation.get('viewability_score', 0.5)
         
-        # Keep your specific bid logic but ensure it's proportional to revenue
+        # Policy: Your specific logic scaled for enterprise budgets
         base_bid = (0.25 + (interest * 0.7) + (view * 0.3)) * 10000
         if observation.get('placement') == "Above the Fold": base_bid += 2000
         
@@ -25,31 +26,26 @@ class BiddingAgent:
 
     def update_stats(self, cost, clicked, observation):
         self.budget = round(self.budget - cost, 2)
-        
         interval = observation.get('hidden_interval', 90)
         daily_traffic = observation.get('hidden_daily_traffic', 1000)
         total_views = daily_traffic * interval
+        predicted_clicks = int(total_views * observation.get('true_click_prob', 0.01))
         
-        # Calculate actual clicks generated in this interval
-        predicted_clicks = total_views * observation.get('true_click_prob', 0.01)
-        
-        # REALISTIC REVENUE: $1.20 CPM and ~$1.50 CPC
+        # Enterprise Revenue Model
         mv_view = 0.0012 
         mv_click = random.uniform(0.80, 3.50) 
-        
         revenue = (total_views * mv_view) + (predicted_clicks * mv_click)
         transaction_profit = round(revenue - cost, 2)
         
         self.cumulative_profit = round(self.cumulative_profit + transaction_profit, 2)
+        if clicked: self.clicks += predicted_clicks
         
-        if clicked: self.clicks += int(predicted_clicks)
         self.history.append({"budget": self.budget, "profit": self.cumulative_profit, "clicks": self.clicks})
         
         return {
             "profit": transaction_profit, "revenue": round(revenue, 2),
-            "views": total_views, "clicks": int(predicted_clicks),
-            "mv_click": round(mv_click, 2), "mv_view": mv_view, 
-            "interval": interval
+            "views": total_views, "clicks": predicted_clicks,
+            "mv_click": round(mv_click, 2), "mv_view": mv_view, "interval": interval
         }
 
     def get_status_dict(self):

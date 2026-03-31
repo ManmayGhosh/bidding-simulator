@@ -16,15 +16,15 @@ class WebPublisherSimulator:
         interest = round(random.uniform(0.1, 0.95), 4)
         view = round(random.uniform(0.4, 0.90), 2)
 
-        # REALISTIC SCALE: Mid-level site traffic (500-2500 visitors/day)
+        # Enterprise Scale: 90/180/360 day contracts
         interval_days = random.choice([90, 180, 360]) 
         daily_traffic = random.randint(500, 2500) 
 
-        # REALISTIC CTR: Baseline 0.5% (0.005)
-        prob = 0.005 
-        if cat in ["Finance", "Tech"]: prob += 0.008
-        if fmt == "Video Unit": prob += 0.005
-        if place == "Above the Fold": prob += 0.007
+        # Click Probability Logic
+        prob = 0.015 
+        if cat in ["Finance", "Tech"]: prob += 0.015
+        if fmt == "Video Unit": prob += 0.01
+        if place == "Above the Fold": prob += 0.01
         if "Mobile" in dev: prob += 0.005 
         prob += (interest * 0.01)
 
@@ -36,7 +36,7 @@ class WebPublisherSimulator:
             "device_type": dev,
             "user_interest_score": interest,
             "viewability_score": view,
-            "true_click_prob": round(min(prob, 0.05), 4), # Capped at a realistic 5% CTR
+            "true_click_prob": round(min(prob, 0.05), 4),
             "hidden_interval": interval_days,
             "hidden_daily_traffic": daily_traffic
         }

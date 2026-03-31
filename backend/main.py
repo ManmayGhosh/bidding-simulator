@@ -15,9 +15,9 @@ agents = []
 @app.post("/api/init-sim")
 async def init_sim(data: dict = Body(...)):
     global agents
+    exchange.auction_counter = 0 
     count = int(data.get("count", 5))
     budget = float(data.get("budget", 100)) * 1000000 
-    
     bias_pool = ["Finance", "Tech", "Video Unit", "Above the Fold", "Mobile (iOS)", "High Interest"]
     agents = [BiddingAgent(f"Agent_{i+1}", budget=budget, bias_type=random.choice(bias_pool)) for i in range(count)]
     return {"status": "success"}

@@ -20,14 +20,14 @@ class WebPublisherSimulator:
         view = round(random.uniform(0.4, 0.99), 2)
 
         # 2. Weighted Probability Calculation (The "Hidden" RL Environment)
-        # Baseline probability of 0.025 (1/40) as requested
-        prob = 0.025
+        # Baseline probability of 0.05 (1/20) as requested
+        prob = 0.05
 
         # Feature Weights
-        if cat in ["Finance", "Tech"]: prob += 0.06
-        if fmt in ["Video Unit", "Interstitial"]: prob += 0.05
-        if place == "Above the Fold": prob += 0.04
-        if "Mobile" in dev: prob += 0.025
+        if cat in ["Finance", "Tech"]: prob += 0.08
+        if fmt in ["Video Unit", "Interstitial"]: prob += 0.12
+        if place == "Above the Fold": prob += 0.05
+        if "Mobile" in dev: prob += 0.05
         
         # Continuous Variables
         prob += (interest * 0.10)

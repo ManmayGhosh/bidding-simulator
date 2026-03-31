@@ -1,9 +1,10 @@
 import random
 
 class BiddingAgent:
-    def __init__(self, agent_id, budget=500.0):
+    def __init__(self, agent_id, budget=100000000.0, bias_type=None):
         self.id = agent_id
         self.budget = budget
+        self.bias_type = bias_type
         self.clicks = 0
         self.cumulative_profit = 0.0
         self.history = [{"budget": budget, "profit": 0.0, "clicks": 0}]
@@ -13,35 +14,43 @@ class BiddingAgent:
         interest = observation.get('user_interest_score', 0.5)
         view = observation.get('viewability_score', 0.5)
         
-        # Policy: Bid higher when signals are strong
-        base_bid = 0.25 + (interest * 0.7) + (view * 0.3)
-        if observation.get('placement') == "Above the Fold": base_bid += 0.2
+        # Keep your specific bid logic but ensure it's proportional to revenue
+        base_bid = (0.25 + (interest * 0.7) + (view * 0.3)) * 10000
+        if observation.get('placement') == "Above the Fold": base_bid += 2000
         
-        bid_value = base_bid + random.uniform(-0.05, 0.05)
-        return round(min(bid_value, self.budget), 2)
+        if self.bias_type and self.bias_type in str(observation.values()):
+            base_bid *= 1.3
+
+        return round(min(base_bid + random.uniform(-500, 500), self.budget), 2)
 
     def update_stats(self, cost, clicked, observation):
         self.budget = round(self.budget - cost, 2)
         
-        # Reward Logic
-        reward_val = 5.0 if clicked else 0.0 
-        transaction_profit = round(reward_val - cost, 2)
+        interval = observation.get('hidden_interval', 90)
+        daily_traffic = observation.get('hidden_daily_traffic', 1000)
+        total_views = daily_traffic * interval
+        
+        # Calculate actual clicks generated in this interval
+        predicted_clicks = total_views * observation.get('true_click_prob', 0.01)
+        
+        # REALISTIC REVENUE: $1.20 CPM and ~$1.50 CPC
+        mv_view = 0.0012 
+        mv_click = random.uniform(0.80, 3.50) 
+        
+        revenue = (total_views * mv_view) + (predicted_clicks * mv_click)
+        transaction_profit = round(revenue - cost, 2)
+        
         self.cumulative_profit = round(self.cumulative_profit + transaction_profit, 2)
         
-        if clicked:
-            self.clicks += 1
-            
-        self.history.append({
-            "budget": self.budget,
-            "profit": self.cumulative_profit,
-            "clicks": self.clicks
-        })
+        if clicked: self.clicks += int(predicted_clicks)
+        self.history.append({"budget": self.budget, "profit": self.cumulative_profit, "clicks": self.clicks})
+        
+        return {
+            "profit": transaction_profit, "revenue": round(revenue, 2),
+            "views": total_views, "clicks": int(predicted_clicks),
+            "mv_click": round(mv_click, 2), "mv_view": mv_view, 
+            "interval": interval
+        }
 
     def get_status_dict(self):
-        return {
-            "id": self.id,
-            "budget": self.budget,
-            "clicks": self.clicks,
-            "profit": self.cumulative_profit,
-            "history": self.history
-        }
+        return {"id": self.id, "budget": self.budget, "clicks": self.clicks, "profit": self.cumulative_profit, "history": self.history}

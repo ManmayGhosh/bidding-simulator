@@ -9,7 +9,6 @@ import AgentLedger from './components/AgentLedger';
 
 const API_BASE = "http://127.0.0.1:8000/api";
 
-// Expanded color palette for dynamic agent counts
 const CHART_COLORS = [
   '#6366f1', '#10b981', '#f59e0b', '#ec4899', '#06b6d4', 
   '#8b5cf6', '#f97316', '#14b8a6', '#ef4444', '#a855f7',
@@ -48,6 +47,7 @@ function App() {
     setLoading(false);
   };
 
+  // Fixed: Update local agents state immediately to reflect in graph
   const startBidding = async () => {
     if (!merchandise) return;
     setLoading(true);
@@ -55,11 +55,14 @@ function App() {
       const res = await axios.post(`${API_BASE}/run-auction`, merchandise);
       const result = res.data.auction_summary;
       setAuctionHistory(prev => [...prev, { ...result, ad_format: merchandise.ad_format }]);
+      
+      // Refresh agents to see immediate graph change
       await fetchStatus();
     } catch (err) { console.error(err); }
     setLoading(false);
   };
 
+  // Fixed: Ensure every simulation step is captured by fetching status after the loop
   const runSimulation = async () => {
     setLoading(true);
     for (let i = 0; i < 20; i++) {
@@ -68,24 +71,34 @@ function App() {
         const currentItem = itemRes.data;
         const bidRes = await axios.post(`${API_BASE}/run-auction`, currentItem);
         const result = bidRes.data.auction_summary;
+        
+        // Accumulate history locally to avoid stale state in loop
         setAuctionHistory(prev => [...prev, { ...result, ad_format: currentItem.ad_format }]);
         setMerchandise(currentItem);
       } catch (err) { console.error(err); }
     }
+    // Final sync after the batch simulation
     await fetchStatus();
     setLoading(false);
   };
 
-  // Helper to structure data for any number of agents
   const formatChartData = (type) => {
-    if (agents.length === 0) return [];
-    return agents[0].history.map((_, i) => {
+    if (agents.length === 0 || !agents[0].history) return [];
+    
+    // Find the max history length among all agents to ensure we don't miss steps
+    const maxSteps = Math.max(...agents.map(a => a.history.length));
+    
+    const chartData = [];
+    for (let i = 0; i < maxSteps; i++) {
       const point = { cycle: i };
       agents.forEach(a => {
-        point[a.id] = a.history[i] ? a.history[i][type] : 0;
+        // Use the value at index i, or the last known value if history is shorter
+        const historyItem = a.history[i] || a.history[a.history.length - 1];
+        point[a.id] = historyItem ? historyItem[type] : 0;
       });
-      return point;
-    });
+      chartData.push(point);
+    }
+    return chartData;
   };
 
   return (
@@ -148,13 +161,13 @@ function App() {
         </section>
 
         <aside style={styles.sidebarPanel}>
-          {/* Budget Chart - Dynamics Agents */}
           <div style={styles.sidebarSection}>
             <h3 style={{fontSize:'0.85rem', color:'#94a3b8', marginBottom:'20px'}}>Budget (Market Participation)</h3>
             <div style={{...styles.chartBox, height: '220px'}}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={formatChartData('budget')}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                  <XAxis dataKey="cycle" hide />
                   <YAxis stroke="#475569" fontSize={10} axisLine={false} />
                   <Tooltip contentStyle={{ background: '#0f172a', border: '1px solid #334155' }} />
                   {agents.map((a, idx) => (
@@ -165,13 +178,13 @@ function App() {
             </div>
           </div>
 
-          {/* Profit Chart - Dynamics Agents */}
           <div style={styles.sidebarSection}>
             <h3 style={{fontSize:'0.85rem', color:'#10b981', marginBottom:'20px'}}>Learning Growth (Cumulative Profit)</h3>
             <div style={{...styles.chartBox, height: '220px'}}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={formatChartData('profit')}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                  <XAxis dataKey="cycle" hide />
                   <YAxis stroke="#475569" fontSize={10} axisLine={false} tickLine={false} />
                   <Tooltip contentStyle={{ background: '#0f172a', border: '1px solid #334155' }} />
                   {agents.map((a, idx) => (

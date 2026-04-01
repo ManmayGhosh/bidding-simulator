@@ -16,15 +16,15 @@ class WebPublisherSimulator:
         interest = round(random.uniform(0.1, 0.95), 4)
         view = round(random.uniform(0.4, 0.90), 2)
 
-        # Enterprise Scale: 90/180/360 day contracts
+        # 90, 180, or 360 day Enterprise Intervals
         interval_days = random.choice([90, 180, 360]) 
         daily_traffic = random.randint(500, 2500) 
 
-        # Click Probability Logic
-        prob = 0.015 
-        if cat in ["Finance", "Tech"]: prob += 0.015
-        if fmt == "Video Unit": prob += 0.01
-        if place == "Above the Fold": prob += 0.01
+        # Click Probability Logic (Industry Standard 1.5% - 5%)
+        prob = 0.005 
+        if cat in ["Finance", "Tech"]: prob += 0.008
+        if fmt == "Video Unit": prob += 0.005
+        if place == "Above the Fold": prob += 0.007
         if "Mobile" in dev: prob += 0.005 
         prob += (interest * 0.01)
 

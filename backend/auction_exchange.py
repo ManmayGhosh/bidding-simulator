@@ -14,10 +14,18 @@ class AdExchange:
         random.shuffle(bids)
         bids.sort(key=lambda x: x[0], reverse=True)
         winner_bid, winner_agent = bids[0]
-        clearing_price = min(bids[1][0] + 0.01 if len(bids) > 1 else 1000.0, winner_bid)
         
+        # Second-price clearing price
+        clearing_price = min(bids[1][0] + 0.01 if len(bids) > 1 else 1000.0, winner_bid)
         is_click = random.random() < bid_request.get('true_click_prob', 0.05)
-        perf_details = winner_agent.update_stats(clearing_price, is_click, bid_request)
+        
+        winner_details = None
+        # SYNC: Every agent updates history for every transaction
+        for agent in agents:
+            is_winner = (agent.id == winner_agent.id)
+            details = agent.update_stats(clearing_price, is_click, bid_request, is_winner)
+            if is_winner:
+                winner_details = details
 
         return {
             "winner_id": winner_agent.id,
@@ -25,5 +33,5 @@ class AdExchange:
             "txn_id": f"TXN-{self.auction_counter:03}",
             "request_id": bid_request.get('request_id'),
             "is_click": is_click,
-            "details": perf_details
+            "details": winner_details
         }

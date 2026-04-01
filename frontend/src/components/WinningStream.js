@@ -3,35 +3,27 @@ import { DollarSign, Tag, Hash, Fingerprint } from 'lucide-react';
 
 const WinningStream = ({ history }) => {
   const [hoveredIndex, setHoveredIndex] = useState(null);
-
   return (
     <div style={streamContainer}>
-      <h3 style={streamTitle}>Live Acquisition Stream</h3>
+      <h3 style={streamTitle}>Acquisition Stream</h3>
       <div style={scrollList}>
-        {history.length === 0 ? <p style={emptyText}>Waiting...</p> : 
+        {history.length === 0 ? <p style={emptyText}>Waiting for market activity...</p> : 
           history.map((item, index) => {
             const isProfit = item.details ? item.details.profit >= 0 : false;
             return (
-              <div 
-                key={index} 
-                style={streamRow}
-                onMouseEnter={() => setHoveredIndex(index)}
-                onMouseLeave={() => setHoveredIndex(null)}
-              >
+              <div key={index} style={streamRow} onMouseEnter={() => setHoveredIndex(index)} onMouseLeave={() => setHoveredIndex(null)}>
                 <div style={rowLeft}>
                   <div style={serialBadge}><Hash size={10}/>{item.txn_id}</div>
                   <span style={agentName}>{item.winner_id}</span>
                 </div>
-
                 {hoveredIndex === index && item.details && (
                   <div style={popupContainer}>
                     <div style={popupHeader}>Enterprise Contract Data</div>
                     <div style={debugRow}><Fingerprint size={10}/> ID: {item.request_id}</div>
                     <div style={popupGrid}>
                       <span>Interval:</span> <strong>{item.details.interval} Days</strong>
-                      <span>Exp. Revenue:</span> <strong>${item.details.revenue.toLocaleString()}</strong>
-                      <span>Exp. Clicks:</span> <strong>{item.details.clicks.toLocaleString()}</strong>
-                      <span>Exp. Views:</span> <strong>{item.details.views.toLocaleString()}</strong>
+                      <span>Revenue:</span> <strong>${item.details.revenue.toLocaleString()}</strong>
+                      <span>Clicks:</span> <strong>{item.details.clicks.toLocaleString()}</strong>
                       <span>Profit:</span> 
                       <strong style={{ color: isProfit ? '#10b981' : '#ef4444' }}>
                         {isProfit ? '' : '-'}${Math.abs(item.details.profit).toLocaleString()}
@@ -39,7 +31,6 @@ const WinningStream = ({ history }) => {
                     </div>
                   </div>
                 )}
-
                 <div style={rowRight}>
                   <span style={tagStyle}><Tag size={12}/> {item.ad_format}</span>
                   <span style={priceStyle}><DollarSign size={12}/>{item.clearing_price.toLocaleString()}</span>

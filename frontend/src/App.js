@@ -46,7 +46,6 @@ function App() {
 
   const formatChartData = (type) => {
     if (!agents.length || !agents[0].history) return [];
-    // Strict 1:1 mapping because history lengths are now identical
     const steps = agents[0].history.length;
     return Array.from({ length: steps }, (_, i) => {
       const entry = { cycle: i };
@@ -99,7 +98,7 @@ function App() {
             <Icons.Zap size={14}/> Run 20x Sim
           </button>
           <div style={styles.inputWrapper}><Icons.Users size={14} /><input type="number" value={config.count} onChange={e => setConfig({...config, count: e.target.value})} style={styles.ghostInput} /><span style={styles.inputLabel}>Agents</span></div>
-          <div style={styles.inputWrapper}><Icons.DollarSign size={14} /><input type="number" value={config.budget} onChange={e => setConfig({...config, budget: e.target.value})} style={styles.ghostInput} /><span style={styles.inputLabel}>Budget</span></div>
+          <div style={styles.inputWrapper}><Icons.DollarSign size={14} /><input type="number" value={config.budget} onChange={e => setConfig({...config, budget: e.target.value})} style={styles.ghostInput} /><span style={styles.inputLabel}>M  Budget</span></div>
           <button onClick={handleInit} style={styles.primaryBtn}>Initialize</button>
         </div>
       </header>

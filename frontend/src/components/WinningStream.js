@@ -16,21 +16,24 @@ const WinningStream = ({ history }) => {
                   <div style={serialBadge}><Hash size={10}/>{item.txn_id}</div>
                   <span style={agentName}>{item.winner_id}</span>
                 </div>
+                
                 {hoveredIndex === index && item.details && (
                   <div style={popupContainer}>
                     <div style={popupHeader}>Enterprise Contract Data</div>
                     <div style={debugRow}><Fingerprint size={10}/> ID: {item.request_id}</div>
                     <div style={popupGrid}>
                       <span>Interval:</span> <strong>{item.details.interval} Days</strong>
-                      <span>Revenue:</span> <strong>${item.details.revenue.toLocaleString()}</strong>
-                      <span>Clicks:</span> <strong>{item.details.clicks.toLocaleString()}</strong>
-                      <span>Profit:</span> 
+                      <span>Exp. Revenue:</span> <strong>${item.details.revenue.toLocaleString()}</strong>
+                      <span>Exp. Clicks:</span> <strong>{item.details.clicks.toLocaleString()}</strong>
+                      <span>Exp. Views:</span> <strong>{item.details.views.toLocaleString()}</strong>
+                      <span>Exp. Profit:</span> 
                       <strong style={{ color: isProfit ? '#10b981' : '#ef4444' }}>
                         {isProfit ? '' : '-'}${Math.abs(item.details.profit).toLocaleString()}
                       </strong>
                     </div>
                   </div>
                 )}
+                
                 <div style={rowRight}>
                   <span style={tagStyle}><Tag size={12}/> {item.ad_format}</span>
                   <span style={priceStyle}><DollarSign size={12}/>{item.clearing_price.toLocaleString()}</span>
@@ -44,6 +47,7 @@ const WinningStream = ({ history }) => {
   );
 };
 
+// Styles for the Stream
 const serialBadge = { background: '#1e293b', color: '#6366f1', fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px', display: 'flex', alignItems: 'center', border: '1px solid #334155', fontFamily: 'monospace' };
 const debugRow = { fontSize: '0.6rem', color: '#475569', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'monospace' };
 const popupContainer = { position: 'absolute', background: '#1e293b', border: '1px solid #334155', padding: '15px', borderRadius: '12px', zIndex: 100, width: '220px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)', left: '120px', top: '-60px' };

@@ -20,7 +20,7 @@ class WebPublisherSimulator:
         interval_days = random.choice([90, 180, 360]) 
         daily_traffic = random.randint(500, 2500) 
 
-        # Click Probability Logic (Industry Standard 1.5% - 5%)
+        # Click Probability Logic
         prob = 0.005 
         if cat in ["Finance", "Tech"]: prob += 0.008
         if fmt == "Video Unit": prob += 0.005

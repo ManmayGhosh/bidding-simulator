@@ -32,7 +32,7 @@ class BiddingAgent:
             total_views = daily_traffic * interval
             predicted_clicks = int(total_views * observation.get('true_click_prob', 0.01))
             
-            # Enterprise Revenue: $1.20 CPM and ~$1.50 CPC
+            # Enterprise Revenue Model
             mv_view = 0.0012 
             mv_click = random.uniform(0.80, 3.50) 
             revenue = (total_views * mv_view) + (predicted_clicks * mv_click)

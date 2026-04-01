@@ -24,8 +24,7 @@ async def init_sim(data: dict = Body(...)):
 
 @app.post("/api/run-auction")
 async def run_auction(bid_request: dict = Body(...)):
-    summary = exchange.run_second_price_auction(bid_request, agents)
-    return {"auction_summary": summary}
+    return {"auction_summary": exchange.run_second_price_auction(bid_request, agents)}
 
 @app.get("/api/status")
 async def get_status():

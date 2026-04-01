@@ -15,7 +15,6 @@ class AdExchange:
         bids.sort(key=lambda x: x[0], reverse=True)
         winner_bid, winner_agent = bids[0]
         
-        # Second-price clearing price
         clearing_price = min(bids[1][0] + 0.01 if len(bids) > 1 else 1000.0, winner_bid)
         is_click = random.random() < bid_request.get('true_click_prob', 0.05)
         

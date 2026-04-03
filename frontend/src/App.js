@@ -33,11 +33,8 @@ function App() {
         const itemRes = await axios.get(`${API_BASE}/generate-request`);
         const bidRes = await axios.post(`${API_BASE}/run-auction`, itemRes.data);
         const summary = bidRes.data.auction_summary;
-        
         setAuctionHistory(prev => [...prev, { ...summary, ad_format: itemRes.data.ad_format }]);
         setMerchandise(itemRes.data);
-        
-        // SYNC: Wait for chart update before starting next auction
         await fetchStatus(); 
       } catch (err) { console.error(err); }
     }
@@ -88,75 +85,45 @@ function App() {
       <header style={styles.header}>
         <div style={styles.brand}>
           <div style={styles.logoIcon}><Icons.Activity size={20} /></div>
-          <div>
-            <h1 style={styles.title}>AD-RESONANCE <span style={styles.subTitle}>RL-ENGINE</span></h1>
-            <p style={styles.tagline}>Multi-Agent Analytics</p>
-          </div>
+          <div><h1 style={styles.title}>AD-RESONANCE <span style={styles.subTitle}>RL-ENGINE</span></h1><p style={styles.tagline}>Multi-Agent Analytics</p></div>
         </div>
         <div style={styles.controlGroup}>
-          <button onClick={runSimulation} style={{...styles.secondaryBtn, borderColor: '#10b981', color: '#10b981'}} disabled={loading || !agents.length}>
-            <Icons.Zap size={14}/> Run 20x Sim
-          </button>
+          <button onClick={runSimulation} style={{...styles.secondaryBtn, borderColor: '#10b981', color: '#10b981'}} disabled={loading || !agents.length}><Icons.Zap size={14}/> Run 20x Sim</button>
           <div style={styles.inputWrapper}><Icons.Users size={14} /><input type="number" value={config.count} onChange={e => setConfig({...config, count: e.target.value})} style={styles.ghostInput} /><span style={styles.inputLabel}>Agents</span></div>
-          <div style={styles.inputWrapper}><Icons.DollarSign size={14} /><input type="number" value={config.budget} onChange={e => setConfig({...config, budget: e.target.value})} style={styles.ghostInput} /><span style={styles.inputLabel}>M  Budget</span></div>
+          <div style={styles.inputWrapper}><Icons.DollarSign size={14} /><input type="number" value={config.budget} onChange={e => setConfig({...config, budget: e.target.value})} style={styles.ghostInput} /><span style={styles.inputLabel}>Budget</span></div>
           <button onClick={handleInit} style={styles.primaryBtn}>Initialize</button>
         </div>
       </header>
       <main style={styles.mainGrid}>
         <section style={styles.showcasePanel}>
           <div style={styles.panelHeader}>
-            <h2 style={styles.panelTitle}><Icons.Layers size={18} /> Showcase</h2>
-            <div style={{display:'flex', gap:'12px'}}>
-              <button onClick={showcaseItem} style={styles.secondaryBtn}>Reveal</button>
-              <button onClick={startBidding} style={styles.ctaBtn}>Bid</button>
-            </div>
+            <h2 style={styles.panelTitle}><Icons.Layers size={18} /> Experience Showcase</h2>
+            <div style={{display:'flex', gap:'12px'}}><button onClick={showcaseItem} style={styles.secondaryBtn}>Reveal</button><button onClick={startBidding} style={styles.ctaBtn}>Bid</button></div>
           </div>
+          
           <div style={styles.scrollArea}>
             {merchandise ? (
               <div style={styles.specGrid}>
-                <MerchCard label='FORMAT' value={merchandise.ad_format} sub={merchandise.ad_slot_size} Icon={Icons.Layout} />
-                <MerchCard label='CATEGORY' value={merchandise.page_category} sub={merchandise.geo_country} Icon={Icons.Search} />
-                <MerchCard label='INTENT' value={`${Math.round(merchandise.user_interest_score * 100)}%`} sub="Interest" Icon={Icons.Target} />
-                <MerchCard label='DEVICE' value={merchandise.device_type} sub="Connection" Icon={Icons.Smartphone} />
-                <MerchCard label='PLACEMENT' value={merchandise.placement} sub="SEO Spot" Icon={Icons.Navigation} />
-                <MerchCard label='VIEW' value={`${Math.round(merchandise.viewability_score * 100)}%`} sub="Score" Icon={Icons.Eye} />
+                {/* Updated Factual Features */}
+                <MerchCard label='FORMAT' value={merchandise.ad_format} sub='Ad Unit' Icon={Icons.Layout} />
+                <MerchCard label='CATEGORY' value={merchandise.page_category} sub='Content Niche' Icon={Icons.Search} />
+                <MerchCard label='DEMOGRAPHIC' value={merchandise.demographic_age} sub={merchandise.demographic_gender} Icon={Icons.Users} />
+                <MerchCard label='GEOGRAPHIC' value={merchandise.geo_city} sub={merchandise.geo_region} Icon={Icons.Globe} />
+                <MerchCard label='PLACEMENT' value={merchandise.placement} sub='SEO Spot' Icon={Icons.Navigation} />
+                <MerchCard label='DEVICE' value={merchandise.device_type} sub='Connection' Icon={Icons.Smartphone} />
               </div>
-            ) : <div style={{textAlign:'center', padding:'150px 0'}}>Waiting for simulation start...</div>}
+            ) : <div style={{textAlign:'center', padding:'150px 0'}}>Waiting for market data...</div>}
           </div>
           <WinningStream history={auctionHistory} />
         </section>
         <aside style={styles.sidebarPanel}>
           <div style={styles.sidebarSection}>
-            <h3 style={{fontSize:'0.85rem', color:'#94a3b8', marginBottom:'20px'}}>Budget</h3>
-            <div style={styles.chartBox}>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={formatChartData('budget')}>
-                  <CartesianGrid stroke="#334155" vertical={false} strokeDasharray="3 3"/>
-                  <XAxis dataKey="cycle" hide/>
-                  <YAxis stroke="#475569" fontSize={10} axisLine={false}/>
-                  <Tooltip contentStyle={{background:'#0f172a', border:'1px solid #334155'}}/>
-                  {agents.map((a, idx) => (
-                    <Line key={a.id} type="monotone" dataKey={a.id} stroke={CHART_COLORS[idx % CHART_COLORS.length]} strokeWidth={2} dot={false} isAnimationActive={false}/>
-                  ))}
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+            <h3 style={{fontSize:'0.85rem', color:'#94a3b8'}}>Budget</h3>
+            <div style={styles.chartBox}><ResponsiveContainer><LineChart data={formatChartData('budget')}><CartesianGrid stroke="#334155" vertical={false}/><XAxis dataKey="cycle" hide/><YAxis stroke="#475569" fontSize={10}/><Tooltip contentStyle={{background:'#0f172a'}}/>{agents.map((a, idx) => <Line key={a.id} type="monotone" dataKey={a.id} stroke={CHART_COLORS[idx % CHART_COLORS.length]} dot={false} isAnimationActive={false}/>)}</LineChart></ResponsiveContainer></div>
           </div>
           <div style={styles.sidebarSection}>
-            <h3 style={{fontSize:'0.85rem', color:'#10b981', marginBottom:'20px'}}>Learning Growth</h3>
-            <div style={styles.chartBox}>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={formatChartData('profit')}>
-                  <CartesianGrid stroke="#334155" vertical={false} strokeDasharray="3 3"/>
-                  <XAxis dataKey="cycle" hide/>
-                  <YAxis stroke="#475569" fontSize={10} axisLine={false} tickLine={false}/>
-                  <Tooltip contentStyle={{background:'#0f172a', border:'1px solid #334155'}}/>
-                  {agents.map((a, idx) => (
-                    <Line key={a.id} type="monotone" dataKey={a.id} stroke={CHART_COLORS[idx % CHART_COLORS.length]} strokeWidth={2} dot={false} isAnimationActive={false}/>
-                  ))}
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+            <h3 style={{fontSize:'0.85rem', color:'#10b981'}}>Learning Growth</h3>
+            <div style={styles.chartBox}><ResponsiveContainer><LineChart data={formatChartData('profit')}><CartesianGrid stroke="#334155" vertical={false}/><XAxis dataKey="cycle" hide/><YAxis stroke="#475569" fontSize={10}/><Tooltip contentStyle={{background:'#0f172a'}}/>{agents.map((a, idx) => <Line key={a.id} type="monotone" dataKey={a.id} stroke={CHART_COLORS[idx % CHART_COLORS.length]} dot={false} isAnimationActive={false}/>)}</LineChart></ResponsiveContainer></div>
           </div>
           <AgentLedger agents={agents} />
         </aside>

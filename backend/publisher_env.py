@@ -60,13 +60,13 @@ class WebPublisherSimulator:
         daily_traffic = random.randint(500, 2500) 
 
         # Click probability influenced by new diverse features
-        prob = 0.005 
-        if cat in ["Finance", "Tech", "Real Estate"]: prob += 0.012
+        prob = 0.03 
+        if cat in ["Finance", "Tech", "Real Estate"]: prob += 0.006
         if age in ["25-34", "35-44"]: prob += 0.008
-        if fmt == "Rewarded Video": prob += 0.015
-        if region in ["North America", "Europe"]: prob += 0.005
+        if fmt == "Rewarded Video": prob += 0.012
+        if region in ["North America", "Europe"]: prob += 0.004
         prob += (interest * 0.02)
-
+        view += (view * 0.01)
         return {
             "request_id": str(uuid.uuid4())[:8],
             "page_category": cat,

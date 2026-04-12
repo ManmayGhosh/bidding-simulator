@@ -35,8 +35,19 @@ class BiddingAgent:
             self.budget = round(self.budget - cost, 2)
             interval = observation.get('hidden_interval', 90)
             daily_traffic = observation.get('hidden_daily_traffic', 1000)
+
+            # Longer intervals reduce the average CTR due to audience saturation.
+            ctr_decay = 1.0
+            if interval == 180:
+                ctr_decay = 0.85  # 15% reduction for 6-month contracts
+            elif interval == 360:
+                ctr_decay = 0.70  # 30% reduction for 1-year contracts
+            
+            # Apply decay to the environment's base CTR
+            effective_ctr = observation.get('true_click_prob', 0.01) * ctr_decay
+            
             total_views = daily_traffic * interval
-            predicted_clicks = int(total_views * observation.get('true_click_prob', 0.01))
+            predicted_clicks = int(total_views * effective_ctr)
             
             mv_view, mv_click = 0.0012, random.uniform(0.80, 3.50) 
             revenue = (total_views * mv_view) + (predicted_clicks * mv_click)

@@ -1,4 +1,4 @@
-# Getting Started with Create React App
+# Getting Started with Create React App(Frontend)
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
@@ -68,3 +68,36 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+
+
+## Github 
+## Push to GitHub 
+## Initial
+git init
+git add .
+git commit -m \"Initial commit: Ad-Resonance RL-Engine Complete\"
+git branch -M main
+git remote add origin [https://github.com/yourusername/your-repo-name.git](https://github.com/yourusername/your-repo-name.git)
+git push -u origin main
+
+
+### Regular Updates
+git add .
+git commit -m \"Update feature: Ad fatigue decay and expanded city pool\"
+git push origin main
+
+### Pulling Updates
+git pull origin main
+
+
+# Backend
+### Setup Virtual Environment
+python -m venv venv
+source venv/Scripts/activate 
+
+### Install Dependencies
+pip install fastapi uvicorn
+
+### Run Backend Server
+uvicorn main:app --reload

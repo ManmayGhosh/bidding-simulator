@@ -12,7 +12,7 @@ const CHART_COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#06b6d4', '#8
 
 function App() {
   const [agents, setAgents] = useState([]);
-  const [config, setConfig] = useState({ count: 5, budget: 100 });
+  const [config, setConfig] = useState({ count: 5, budget: 10 });
   const [merchandise, setMerchandise] = useState(null);
   const [auctionHistory, setAuctionHistory] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -90,7 +90,7 @@ function App() {
         <div style={styles.controlGroup}>
           <button onClick={runSimulation} style={{...styles.secondaryBtn, borderColor: '#10b981', color: '#10b981'}} disabled={loading || !agents.length}><Icons.Zap size={14}/> Run 20x Sim</button>
           <div style={styles.inputWrapper}><Icons.Users size={14} /><input type="number" value={config.count} onChange={e => setConfig({...config, count: e.target.value})} style={styles.ghostInput} /><span style={styles.inputLabel}>Agents</span></div>
-          <div style={styles.inputWrapper}><Icons.DollarSign size={14} /><input type="number" value={config.budget} onChange={e => setConfig({...config, budget: e.target.value})} style={styles.ghostInput} /><span style={styles.inputLabel}>Budget</span></div>
+          <div style={styles.inputWrapper}><Icons.DollarSign size={14} /><input type="number" value={config.budget} onChange={e => setConfig({...config, budget: e.target.value})} style={styles.ghostInput} /><span style={styles.inputLabel}>M Budget</span></div>
           <button onClick={handleInit} style={styles.primaryBtn}>Initialize</button>
         </div>
       </header>
